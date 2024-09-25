@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보드게임 관리</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        h1, h2 {
+            margin: 0;
+        }
+        .content {
+            display: flex;
+            margin-top: 20px;
+        }
+        .register-form, .game-list {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .register-form {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .game-list {
+            flex: 2;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .register-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .reset-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .filter-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .reset-filter-btn {
+            background-color: #FF9800;
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .edit-btn, .delete-btn {
+            padding: 5px 10px;
+            margin: 0 5px;
+        }
+        .edit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .game-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+        }
+        .filter-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+        .filter-section > * {
+            margin-right: 10px;
+            flex: 1;
+            min-width: 100px;
+        }
+        .filter-section button {
+            flex: 0 0 auto;
+        }
+        .difficulty {
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+        }
+        .very-easy { background-color: #FFFACD; color: black; }
+        .easy { background-color: #FFA500; }
+        .normal { background-color: #228B22; }
+        .hard { background-color: #8B4513; }
+        .very-hard { background-color: #8A2BE2; }
+        .extreme { background-color: #FF0000; }
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .register-form {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            .filter-section {
+                flex-wrap: wrap;
+            }
+            .filter-section > * {
+                flex: 1 1 calc(50% - 10px);
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>보드게임 관리</h1>
+    </header>
+    <div class="container">
+        <div class="content">
+            <div class="register-form">
+                <h2>게임 등록/수정</h2>
+                <form id="game-form">
+                    <input type="text" id="game-name" placeholder="보드게임 이름" required>
+                    <select id="game-difficulty" required>
+                        <option value="">난이도 선택</option>
+                        <option value="Very Easy">Very Easy</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Hard">Hard</option>
+                        <option value="Very Hard">Very Hard</option>
+                        <option value="Extreme">Extreme</option>
+                    </select>
+                    <input type="number" id="min-players" placeholder="최소 인원수" required>
+                    <input type="number" id="max-players" placeholder="최대 인원수" required>
+                    <input type="number" id="play-time" placeholder="플레이 시간 (분)" required>
+                    <select id="game-genre" required>
+                        <option value="">장르 선택</option>
+                        <option value="전략">전략</option>
+                        <option value="파티">파티</option>
+                        <option value="협력">협력</option>
+                        <option value="카드">카드</option>
+                        <option value="추리">추리</option>
+                    </select>
+                    <textarea id="game-notes" placeholder="비고 (선택사항)"></textarea>
+                    <input type="file" id="game-image" accept="image/*">
+                    <button type="submit" class="register-btn">등록/수정</button>
+                    <button type="reset" class="reset-btn">리셋</button>
+                </form>
+            </div>
+            <div class="game-list">
+                <h2>등록된 게임 목록</h2>
+                <div class="filter-section">
+                    <input type="text" id="search-input" placeholder="게임 검색">
+                    <select id="difficulty-filter">
+                        <option value="">모든 난이도</option>
+                        <option value="Very Easy">Very Easy</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Hard">Hard</option>
+                        <option value="Very Hard">Very Hard</option>
+                        <option value="Extreme">Extreme</option>
+                    </select>
+                    <select id="genre-filter">
+                        <option value="">모든 장르</option>
+                        <option value="전략">전략</option>
+                        <option value="파티">파티</option>
+                        <option value="협력">협력</option>
+                        <option value="카드">카드</option>
+                        <option value="추리">추리</option>
+                    </select>
+                    <input type="number" id="players-filter" placeholder="인원수">
+                    <button onclick="applyFilters()" class="filter-btn">필터 적용</button>
+                    <button onclick="resetFilters()" class="reset-filter-btn">초기화</button>
+                </div>
+                <table id="games-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>이미지</th>
+                            <th>이름</th>
+                            <th>난이도</th>
+                            <th>인원수</th>
+                            <th>플레이 시간</th>
+                            <th>장르</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let games = [];
+        let editingIndex = -1;
+
+        const gameForm = document.getElementById('game-form');
+        const gamesTable = document.getElementById('games-table').getElementsByTagName('tbody')[0];
+        const searchInput = document.getElementById('search-input');
+
+        function loadGames() {
+            const savedGames = localStorage.getItem('boardGames');
+            if (savedGames) {
+                games = JSON.parse(savedGames);
+                sortGames();
+                updateGamesList();
+            }
+        }
+
+        function saveGames() {
+            localStorage.setItem('boardGames', JSON.stringify(games));
+        }
+
+        function sortGames() {
+            games.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        }
+
+        gameForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const imageFile = document.getElementById('game-image').files[0];
+            
+            function saveGameData(imageData) {
+                const game = {
+                    name: document.getElementById('game-name').value,
+                    difficulty: document.getElementById('game-difficulty').value,
+                    minPlayers: document.getElementById('min-players').value,
+                    maxPlayers: document.getElementById('max-players').value,
+                    playTime: document.getElementById('play-time').value,
+                    genre: document.getElementById('game-genre').value,
+                    notes: document.getElementById('game-notes').value,
+                    image: imageData
+                };
+
+                if (editingIndex === -1) {
+                    games.push(game);
+                } else {
+                    if (imageData) {
+                        game.image = imageData;
+                    } else {
+                        game.image = games[editingIndex].image;
+                    }
+                    games[editingIndex] = game;
+                    editingIndex = -1;
+                }
+
+                sortGames();
+                updateGamesList();
+                saveGames();
+                gameForm.reset();
+                document.querySelector('.register-btn').textContent = '등록/수정';
+            }
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    saveGameData(event.target.result);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                saveGameData(null);
+            }
+        });
+
+        function getDifficultyClass(difficulty) {
+            switch (difficulty) {
+                case 'Very Easy': return 'very-easy';
+                case 'Easy': return 'easy';
+                case 'Normal': return 'normal';
+                case 'Hard': return 'hard';
+                case 'Very Hard': return 'very-hard';
+                case 'Extreme': return 'extreme';
+                default: return '';
+            }
+        }
+
+        function updateGamesList(filteredGames = games) {
+            gamesTable.innerHTML = '';
+            filteredGames.forEach((game, index) => {
+                const row = gamesTable.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><img src="${game.image || '/api/placeholder/100/100'}" alt="${game.name}" class="game-image"></td>
+                    <td>${game.name}</td>
+                    <td><span class="difficulty ${getDifficultyClass(game.difficulty)}">${game.difficulty}</span></td>
+                    <td>${game.minPlayers}-${game.maxPlayers}</td>
+                    <td>${game.playTime}분</td>
+                    <td>${game.genre}</td>
+                    <td>
+                        <button onclick="editGame(${games.indexOf(game)})" class="edit-btn">수정</button>
+                        <button onclick="deleteGame(${games.indexOf(game)})" class="delete-btn">삭제</button>
+                    </td>
+                `;
+            });
+        }
+
+        function editGame(index) {
+            const game = games[index];
+            document.getElementById('game-name').value = game.name;
+            document.getElementById('game-difficulty').value = game.difficulty;
+            document.getElementById('min-players').value = game.minPlayers;
+            document.getElementById('max-players').value = game.maxPlayers;
+            document.getElementById('play-time').value = game.playTime;
+            document.getElementById('game-genre').value = game.genre;
+            document.getElementById('game-notes').value = game.notes;
+            editingIndex = index;
+            document.querySelector('.register-btn').textContent = '수정';
+        }
+
+        function deleteGame(index) {
+            if (confirm('정말로 이 게임을 삭제하시겠습니까?')) {
+                games.splice(index, 1);
+                updateGamesList();
+                saveGames();
+            }
+        }
+
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const difficultyFilter = document.getElementById('difficulty-filter').value;
+            const genreFilter = document.getElementById('genre-filter').value;
+            const playersFilter = document.getElementById('players-filter').value;
+
+            const filteredGames = games.filter(game => {
+                const nameMatch = game.name.toLowerCase().includes(searchTerm);
+                const difficultyMatch = !difficultyFilter || game.difficulty === difficultyFilter;
+                const genreMatch = !genreFilter || game.genre === genreFilter;
+                const playersMatch = !playersFilter || 
+                    (parseInt(game.minPlayers) <= parseInt(playersFilter) && 
+                     parseInt(game.maxPlayers) >= parseInt(playersFilter));
+                return nameMatch && difficultyMatch && genreMatch && playersMatch;
+            });
+
+            updateGamesList(filteredGames);
+        }
+
+        function resetFilters() {
+            searchInput.value = '';
+            document.getElementById('difficulty-filter').value = '';
+            document.getElementById('genre-filter').value = '';
+            document.getElementById('players-filter').value = '';
+            updateGamesList();
+        }
+
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFilters();
+            }
+        });
+
+        window.onload = loadGames;
+    </script>
+</body>
+</html>

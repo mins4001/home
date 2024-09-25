@@ -14,7 +14,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
         }
         header {
             background-color: #333;
@@ -27,34 +27,31 @@
         }
         .content {
             display: flex;
+            flex-direction: column;
             margin-top: 20px;
         }
         .register-form, .game-list {
             background-color: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .register-form {
-            flex: 1;
-            margin-right: 20px;
-        }
-        .game-list {
-            flex: 2;
+            margin-bottom: 20px;
         }
         input, select, textarea {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
         }
         button {
-            padding: 8px 15px;
+            padding: 10px 15px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
         }
         .register-btn {
             background-color: #4CAF50;
@@ -86,7 +83,8 @@
         }
         .edit-btn, .delete-btn {
             padding: 5px 10px;
-            margin: 0 5px;
+            margin: 2px;
+            width: auto;
         }
         .edit-btn {
             background-color: #2196F3;
@@ -103,25 +101,16 @@
         }
         .filter-section {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex-direction: column;
             margin-bottom: 20px;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-        }
-        .filter-section > * {
-            margin-right: 10px;
-            flex: 1;
-            min-width: 100px;
-        }
-        .filter-section button {
-            flex: 0 0 auto;
         }
         .difficulty {
             padding: 5px 10px;
             border-radius: 4px;
             color: white;
             font-weight: bold;
+            display: inline-block;
+            margin-bottom: 5px;
         }
         .very-easy { background-color: #FFFACD; color: black; }
         .easy { background-color: #FFA500; }
@@ -129,20 +118,57 @@
         .hard { background-color: #8B4513; }
         .very-hard { background-color: #8A2BE2; }
         .extreme { background-color: #FF0000; }
-        @media (max-width: 768px) {
+        @media (min-width: 768px) {
             .content {
-                flex-direction: column;
+                flex-direction: row;
             }
             .register-form {
-                margin-right: 0;
-                margin-bottom: 20px;
+                flex: 1;
+                margin-right: 20px;
+            }
+            .game-list {
+                flex: 2;
             }
             .filter-section {
-                flex-wrap: wrap;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
             }
             .filter-section > * {
-                flex: 1 1 calc(50% - 10px);
-                margin-bottom: 10px;
+                margin-right: 10px;
+                flex: 1;
+            }
+            button {
+                width: auto;
+            }
+        }
+        @media (max-width: 767px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+            }
+            td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+            }
+            td:before {
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label);
+                font-weight: bold;
             }
         }
     </style>
@@ -315,14 +341,14 @@
             filteredGames.forEach((game, index) => {
                 const row = gamesTable.insertRow();
                 row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td><img src="${game.image || '/api/placeholder/100/100'}" alt="${game.name}" class="game-image"></td>
-                    <td>${game.name}</td>
-                    <td><span class="difficulty ${getDifficultyClass(game.difficulty)}">${game.difficulty}</span></td>
-                    <td>${game.minPlayers}-${game.maxPlayers}</td>
-                    <td>${game.playTime}분</td>
-                    <td>${game.genre}</td>
-                    <td>
+                    <td data-label="번호">${index + 1}</td>
+                    <td data-label="이미지"><img src="${game.image || '/api/placeholder/100/100'}" alt="${game.name}" class="game-image"></td>
+                    <td data-label="이름">${game.name}</td>
+                    <td data-label="난이도"><span class="difficulty ${getDifficultyClass(game.difficulty)}">${game.difficulty}</span></td>
+                    <td data-label="인원수">${game.minPlayers}-${game.maxPlayers}</td>
+                    <td data-label="플레이 시간">${game.playTime}분</td>
+                    <td data-label="장르">${game.genre}</td>
+                    <td data-label="관리">
                         <button onclick="editGame(${games.indexOf(game)})" class="edit-btn">수정</button>
                         <button onclick="deleteGame(${games.indexOf(game)})" class="delete-btn">삭제</button>
                     </td>
@@ -385,6 +411,7 @@
             }
         });
 
+        // 페이지 로드 시 게임 목록 불러오기
         window.onload = loadGames;
     </script>
 </body>
